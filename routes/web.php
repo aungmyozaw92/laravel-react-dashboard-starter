@@ -14,27 +14,29 @@ Route::middleware(['auth', 'verified'])->group(function () {
         return Inertia::render('dashboard');
     })->name('dashboard');
 
-    // admin user routes
-    Route::resource('admin/users', UserController::class)->names([
-        'index' => 'admin.users.index',
-        'create' => 'admin.users.create',
-        'store' => 'admin.users.store',
-        'show' => 'admin.users.show',
-        'edit' => 'admin.users.edit',
-        'update' => 'admin.users.update',
-        'destroy' => 'admin.users.destroy',
-    ]);
+    // Admin user management routes with specific permissions
+    Route::prefix('admin/users')->name('admin.users.')->group(function () {
+        Route::get('/', [UserController::class, 'index'])->middleware('permission:user-list')->name('index');
+        Route::get('/create', [UserController::class, 'create'])->middleware('permission:user-create')->name('create');
+        Route::post('/', [UserController::class, 'store'])->middleware('permission:user-create')->name('store');
+        Route::get('/{user}', [UserController::class, 'show'])->middleware('permission:user-list')->name('show');
+        Route::get('/{user}/edit', [UserController::class, 'edit'])->middleware('permission:user-edit')->name('edit');
+        Route::patch('/{user}', [UserController::class, 'update'])->middleware('permission:user-edit')->name('update');
+        Route::put('/{user}', [UserController::class, 'update'])->middleware('permission:user-edit')->name('update');
+        Route::delete('/{user}', [UserController::class, 'destroy'])->middleware('permission:user-delete')->name('destroy');
+    });
 
-    // admin role routes
-    Route::resource('admin/roles', RoleController::class)->names([
-        'index' => 'admin.roles.index',
-        'create' => 'admin.roles.create',
-        'store' => 'admin.roles.store',
-        'show' => 'admin.roles.show',
-        'edit' => 'admin.roles.edit',
-        'update' => 'admin.roles.update',
-        'destroy' => 'admin.roles.destroy',
-    ]);
+    // Admin role management routes with specific permissions
+    Route::prefix('admin/roles')->name('admin.roles.')->group(function () {
+        Route::get('/', [RoleController::class, 'index'])->middleware('permission:role-list')->name('index');
+        Route::get('/create', [RoleController::class, 'create'])->middleware('permission:role-create')->name('create');
+        Route::post('/', [RoleController::class, 'store'])->middleware('permission:role-create')->name('store');
+        Route::get('/{role}', [RoleController::class, 'show'])->middleware('permission:role-list')->name('show');
+        Route::get('/{role}/edit', [RoleController::class, 'edit'])->middleware('permission:role-edit')->name('edit');
+        Route::patch('/{role}', [RoleController::class, 'update'])->middleware('permission:role-edit')->name('update');
+        Route::put('/{role}', [RoleController::class, 'update'])->middleware('permission:role-edit')->name('update');
+        Route::delete('/{role}', [RoleController::class, 'destroy'])->middleware('permission:role-delete')->name('destroy');
+    });
 });
 
 

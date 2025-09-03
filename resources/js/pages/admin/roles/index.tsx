@@ -6,6 +6,7 @@ import { route } from 'ziggy-js';
 import { useDeleteConfirmation } from '@/hooks/use-delete-confirmation';
 import { DeleteConfirmation } from '@/components/delete-confirmation';
 import { Plus, Eye, Edit2, Trash2, ShieldX } from 'lucide-react';
+import { can } from '@/lib/can';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -39,12 +40,14 @@ export default function Index({roles}) {
                                 <p className="text-sm text-gray-600">Manage and organize your roles</p>
                             </div>
                         </div>
+                        {can('role-create') && (
                         <Link 
                             href="/admin/roles/create"
                             className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 focus:ring-2 focus:ring-blue-500 focus:outline-none transition-colors shadow-sm">
                             <Plus className="w-4 h-4" />
                             Add Role
                         </Link>
+                        )}
                     </div>
 
                     <div className="bg-white shadow-sm rounded-lg overflow-hidden">
@@ -105,12 +108,15 @@ export default function Index({roles}) {
                                                 <Eye className="w-3.5 h-3.5" />
                                                 View
                                             </Link>
+                                            {can('role-edit') && (
                                             <Link 
                                                 href={`/admin/roles/${role.id}/edit`}
                                                 className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-green-700 bg-green-50 border border-green-200 rounded-lg hover:bg-green-100 hover:border-green-300 focus:ring-2 focus:ring-green-500 focus:outline-none transition-all shadow-sm">
                                                 <Edit2 className="w-3.5 h-3.5" />
                                                 Edit
                                             </Link>
+                                            )}
+                                            {can('role-delete') && (
                                             <button
                                                 onClick={() => openDeleteModal(role)}
                                                 className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-red-700 bg-red-50 border border-red-200 rounded-lg hover:bg-red-100 hover:border-red-300 focus:ring-2 focus:ring-red-500 focus:outline-none transition-all shadow-sm"
@@ -118,6 +124,7 @@ export default function Index({roles}) {
                                                 <Trash2 className="w-3.5 h-3.5" />
                                                 Delete
                                             </button>
+                                            )}
                                         </div>
                                     </td>
                                 </tr>

@@ -1,6 +1,7 @@
 import { DeleteConfirmation } from '@/components/delete-confirmation';
 import { useDeleteConfirmation } from '@/hooks/use-delete-confirmation';
 import AppLayout from '@/layouts/app-layout';
+import { can } from '@/lib/can';
 import { type BreadcrumbItem } from '@/types';
 import { Head, Link, useForm } from '@inertiajs/react';
 import { ArrowLeft, Edit2, Eye, Shield, Trash2 } from 'lucide-react';
@@ -108,6 +109,7 @@ export default function Show({ rolePermissions, role }: Props) {
                             </div>
                         </div>
                         <div className="flex items-center space-x-3">
+                            {can('role-edit') && (
                             <Link
                                 href={`/admin/roles/${role.id}/edit`}
                                 className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 focus:ring-2 focus:ring-blue-500 focus:outline-none transition-colors shadow-sm"
@@ -115,6 +117,8 @@ export default function Show({ rolePermissions, role }: Props) {
                                 <Edit2 className="w-4 h-4" />
                                 Edit Role
                             </Link>
+                            )}
+                            {can('role-delete') && (
                             <button
                                 onClick={() => openDeleteModal(role)}
                                 className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-red-700 bg-red-50 border border-red-200 rounded-lg hover:bg-red-100 hover:border-red-300 focus:ring-2 focus:ring-red-500 focus:outline-none transition-colors"
@@ -122,6 +126,7 @@ export default function Show({ rolePermissions, role }: Props) {
                                 <Trash2 className="w-4 h-4" />
                                 Delete Role
                             </button>
+                            )}
                         </div>
                     </div>
                 </div>
@@ -211,12 +216,14 @@ export default function Show({ rolePermissions, role }: Props) {
                                     </div>
                                     <h3 className="text-lg font-medium text-gray-900 mb-2">No Permissions Assigned</h3>
                                     <p className="text-gray-600 mb-4">This role doesn't have any permissions assigned yet.</p>
+                                    {can('role-edit') && (
                                     <Link 
                                         href={`/admin/roles/${role.id}/edit`}
                                         className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 focus:ring-2 focus:ring-blue-500 focus:outline-none transition-colors">
                                         <Edit2 className="w-4 h-4" />
                                         Assign Permissions
                                     </Link>
+                                    )}
                                 </div>
                             )}
                         </div>
