@@ -7,6 +7,8 @@ import { useDeleteConfirmation } from '@/hooks/use-delete-confirmation';
 import { DeleteConfirmation } from '@/components/delete-confirmation';
 import { Plus, Users, Eye, Edit2, Trash2 } from 'lucide-react';
 import { can } from '@/lib/can';
+import { Pagination } from '@/components/ui/pagination';
+import { SearchInput } from '@/components/search-input';
 
 interface User {
     id: number;
@@ -18,8 +20,26 @@ interface User {
     }>;
 }
 
+interface PaginatedUsers {
+    data: User[];
+    current_page: number;
+    last_page: number;
+    per_page: number;
+    total: number;
+    from: number;
+    to: number;
+    links: Array<{
+        url: string | null;
+        label: string;
+        active: boolean;
+    }>;
+}
+
 interface Props {
-    users: User[];
+    users: PaginatedUsers;
+    filters: {
+        search: string;
+    };
 }
 
 const breadcrumbs: BreadcrumbItem[] = [
@@ -29,7 +49,7 @@ const breadcrumbs: BreadcrumbItem[] = [
     },
 ];
 
-export default function Index({ users }: Props) {
+export default function Index({ users, filters }: Props) {
     const {
         isModalOpen,
         itemToDelete,
@@ -66,7 +86,15 @@ export default function Index({ users }: Props) {
 
                     <div className="bg-white shadow-sm rounded-lg overflow-hidden">
                         <div className="px-6 py-4 border-b border-gray-200">
-                            <h3 className="text-lg font-medium text-gray-900">All Users</h3>
+                            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                                <h3 className="text-lg font-medium text-gray-900">All Users</h3>
+                                <div className="w-full sm:w-64">
+                                    <SearchInput 
+                                        value={filters.search}
+                                        placeholder="Search users..."
+                                    />
+                                </div>
+                            </div>
                         </div>
                         <div className="overflow-x-auto">
                             <table className="w-full text-sm text-left text-gray-700">
@@ -80,7 +108,7 @@ export default function Index({ users }: Props) {
                                 </tr>
                                 </thead>
                                 <tbody>
-                                {users.map((user) => (
+                                {users.data.map((user) => (
                                 <tr key={user.id} className="odd:bg-white even:bg-gray-50 border-b border-gray-200">
                                     <td className="px-6 py-4 font-medium text-gray-900">{user.id}</td>
                                     <td className="px-6 py-4 text-gray-700">{user.name}</td>
@@ -133,6 +161,11 @@ export default function Index({ users }: Props) {
                                 ))}
                                 </tbody>
                             </table>
+
+                            {/* Pagination */}
+                            <div className="px-6 py-4 border-t border-gray-200">
+                                <Pagination links={users.links} />
+                            </div>
                         </div>
                     </div>
                 </div>

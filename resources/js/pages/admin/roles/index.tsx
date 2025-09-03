@@ -7,6 +7,8 @@ import { useDeleteConfirmation } from '@/hooks/use-delete-confirmation';
 import { DeleteConfirmation } from '@/components/delete-confirmation';
 import { Plus, Eye, Edit2, Trash2, ShieldX } from 'lucide-react';
 import { can } from '@/lib/can';
+import { Pagination } from '@/components/ui/pagination';
+import { SearchInput } from '@/components/search-input';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -15,7 +17,7 @@ const breadcrumbs: BreadcrumbItem[] = [
     },
 ];
 
-export default function Index({roles}) {
+export default function Index({roles, filters}) {
     const {
         isModalOpen,
         itemToDelete,
@@ -52,7 +54,15 @@ export default function Index({roles}) {
 
                     <div className="bg-white shadow-sm rounded-lg overflow-hidden">
                         <div className="px-6 py-4 border-b border-gray-200">
-                            <h3 className="text-lg font-medium text-gray-900">All Roles</h3>
+                            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                                <h3 className="text-lg font-medium text-gray-900">All Roles</h3>
+                            <div className="w-full sm:w-64">
+                                    <SearchInput 
+                                        value={filters.search}
+                                        placeholder="Search roles..."
+                                    />
+                                </div>
+                            </div>
                         </div>
                         <div className="overflow-x-auto">
                             <table className="w-full text-sm text-left text-gray-700">
@@ -65,7 +75,7 @@ export default function Index({roles}) {
                                 </tr>
                                 </thead>
                                 <tbody>
-                                {roles.map((role) => (
+                                {roles.data.map((role) => (
                                 <tr key={role.id} className="odd:bg-white even:bg-gray-50 border-b border-gray-200">
                                     <td className="px-6 py-4 font-medium text-gray-900">{role.id}</td>
                                     <td className="px-6 py-4 text-gray-700">{role.name}</td>
@@ -131,6 +141,12 @@ export default function Index({roles}) {
                                 ))}
                                 </tbody>
                             </table>
+
+                             {/* Pagination */}
+                             <div className="px-6 py-4 border-t border-gray-200">
+                                <Pagination links={roles.links} />
+                            </div>
+
                         </div>
                     </div>
                 </div>
