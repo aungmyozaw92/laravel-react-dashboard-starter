@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Admin\User\StoreUserRequest;
+use App\Http\Requests\Admin\User\UpdateUserRequest;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
@@ -52,34 +54,22 @@ class UserController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
+    public function store(StoreUserRequest $request)
     {
-        $request->validate([
-            'name' => 'required|string|max:255',
-            'email' => 'required|string|email|max:255|unique:'.User::class,
-            'password' => 'required|string|min:8',
-            'roles' => 'required|array|min:1',
-            'roles.*' => 'string|exists:roles,name',
-        ], [
-            'roles.required' => 'Please select at least one role for the user.',
-            'roles.min' => 'Please select at least one role for the user.',
-            'roles.*.exists' => 'One or more selected roles are invalid.',
-        ]);
+        $validated = $request->validated();
 
         $user = User::create([
-            'name' => $request->name,
-            'email' => $request->email,
-            'password' => Hash::make($request->password),
+            'name' => $validated['name'],
+            'email' => $validated['email'],
+            'password' => Hash::make($validated['password']),
         ]);
 
         // Assign roles to the user
-        // if ($request->has('roles') && !empty($request->roles)) {
-        //     $user->assignRole($request->roles);
-        // }
-        $user->syncRoles($request->roles);
+        if (isset($validated['roles'])) {
+            $user->syncRoles($validated['roles']);
+        }
 
         return redirect()->route('admin.users.index');
-
     }
 
     /**
@@ -110,31 +100,21 @@ class UserController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, string $id)
+    public function update(UpdateUserRequest $request, string $id)
     {
-        $request->validate([
-            'name' => 'required|string|max:255',
-            'email' => 'required|string|email|max:255|unique:'.User::class.',email,'.$id,
-            'password' => 'nullable|string|min:8',
-            'roles' => 'required|array|min:1',
-            'roles.*' => 'string|exists:roles,name',
-        ], [
-            'roles.required' => 'Please select at least one role for the user.',
-            'roles.min' => 'Please select at least one role for the user.',
-            'roles.*.exists' => 'One or more selected roles are invalid.',
-        ]);
+        $validated = $request->validated();
+        $user = User::findOrFail($id);      
 
-        $user = User::findOrFail($id);
-        $user->name = $request->name;
-        $user->email = $request->email;
-        if ($request->password) {
-            $user->password = Hash::make($request->password);
+        $user->name = $validated['name'];
+        $user->email = $validated['email'];
+        if (!empty($validated['password'])) {
+            $user->password = Hash::make($validated['password']);
         }
         $user->save();
 
         // Update user roles
-        if ($request->has('roles')) {
-            $user->syncRoles($request->roles ?? []);
+        if (isset($validated['roles'])) {
+            $user->syncRoles($validated['roles']);
         }
 
         return redirect()->route('admin.users.index');

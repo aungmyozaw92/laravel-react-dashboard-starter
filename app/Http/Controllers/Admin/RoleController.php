@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Admin\Role\StoreRoleRequest;
+use App\Http\Requests\Admin\Role\UpdateRoleRequest;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Spatie\Permission\Models\Permission;
@@ -51,18 +53,15 @@ class RoleController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
+    public function store(StoreRoleRequest $request)
     {
-        $request->validate([
-            'name' => 'required|string|max:255',
-            'permissions' => 'required|array',
-        ]);
+        $validated = $request->validated();
 
         $role = Role::create([
-            'name' => $request->name,
+            'name' => $validated['name'],
         ]);
 
-        $role->syncPermissions($request->permissions);
+        $role->syncPermissions($validated['permissions']);
 
         return redirect()->route('admin.roles.index');
     }
@@ -96,18 +95,15 @@ class RoleController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, string $id)
+    public function update(UpdateRoleRequest $request, string $id)
     {
-        $request->validate([
-            'name' => 'required|string|max:255',
-            'permissions' => 'required|array',
-        ]);
+        $validated = $request->validated();
 
         $role = Role::findOrFail($id);
-        $role->name = $request->name;
+        $role->name = $validated['name'];
         $role->save();
 
-        $role->syncPermissions($request->permissions);
+        $role->syncPermissions($validated['permissions']);
 
         return redirect()->route('admin.roles.index');
     }
