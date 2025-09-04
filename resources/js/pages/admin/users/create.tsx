@@ -20,7 +20,6 @@ const breadcrumbs: BreadcrumbItem[] = [
 ];
 
 export default function Create({ roles }: Props) {
-    
     const {data, setData, errors, post} = useForm<{
         name: string;
         email: string;
@@ -75,11 +74,7 @@ export default function Create({ roles }: Props) {
         }
         
         post('/admin/users', {
-            onSuccess: () => {
-                console.log('User created successfully');
-            },
             onError: (errors) => {
-                console.log('Validation errors:', errors);
                 // Close dropdown on validation error
                 setIsRoleDropdownOpen(false);
             }

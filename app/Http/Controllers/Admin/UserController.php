@@ -54,12 +54,13 @@ class UserController extends Controller
     {
         $validated = $request->validated();
         
-        $this->userService->createUser(
+        $user = $this->userService->createUser(
             $validated,
             $validated['roles'] ?? []
         );
 
-        return redirect()->route('admin.users.index');
+        return redirect()->route('admin.users.index')
+            ->with('successMessage', "User '{$user->name}' has been created successfully.");
     }
 
     /**
@@ -104,13 +105,15 @@ class UserController extends Controller
     {
         $validated = $request->validated();
         
+        $user = $this->userService->findUserById((int) $id);
         $this->userService->updateUser(
             (int) $id,
             $validated,
             $validated['roles'] ?? []
         );
 
-        return redirect()->route('admin.users.index');
+        return redirect()->route('admin.users.index')
+            ->with('successMessage', "User '{$user->name}' has been updated successfully.");
     }
 
     /**
@@ -118,7 +121,12 @@ class UserController extends Controller
      */
     public function destroy(string $id)
     {
+        $user = $this->userService->findUserById((int) $id);
+        $userName = $user ? $user->name : 'User';
+        
         $this->userService->deleteUser((int) $id);
-        return redirect()->route('admin.users.index')->with('success', 'User deleted successfully');
+        
+        return redirect()->route('admin.users.index')
+            ->with('successMessage', "User '{$userName}' has been deleted successfully.");
     }
 }

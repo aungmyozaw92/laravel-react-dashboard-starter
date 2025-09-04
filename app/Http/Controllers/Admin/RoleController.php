@@ -53,12 +53,13 @@ class RoleController extends Controller
     {
         $validated = $request->validated();
         
-        $this->roleService->createRole(
+        $role = $this->roleService->createRole(
             $validated,
             $validated['permissions'] ?? []
         );
 
-        return redirect()->route('admin.roles.index');
+        return redirect()->route('admin.roles.index')
+            ->with('successMessage', "Role '{$role->name}' has been created successfully.");
     }
 
     /**
@@ -104,13 +105,15 @@ class RoleController extends Controller
     {
         $validated = $request->validated();
         
+        $role = $this->roleService->findRoleById((int) $id);
         $this->roleService->updateRole(
             (int) $id,
             $validated,
             $validated['permissions'] ?? []
         );
 
-        return redirect()->route('admin.roles.index');
+        return redirect()->route('admin.roles.index')
+            ->with('successMessage', "Role '{$role->name}' has been updated successfully.");
     }
 
     /**
@@ -118,7 +121,12 @@ class RoleController extends Controller
      */
     public function destroy(string $id)
     {
+        $role = $this->roleService->findRoleById((int) $id);
+        $roleName = $role ? $role->name : 'Role';
+        
         $this->roleService->deleteRole((int) $id);
-        return redirect()->route('admin.roles.index');
+        
+        return redirect()->route('admin.roles.index')
+            ->with('successMessage', "Role '{$roleName}' has been deleted successfully.");
     }
 }

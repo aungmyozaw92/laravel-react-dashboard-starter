@@ -37,14 +37,7 @@ export default function Edit({ permission }: Props) {
     function submit(e: React.FormEvent) {
         e.preventDefault();
         
-        put(route('admin.permissions.update', permission.id), {
-            onSuccess: () => {
-                console.log('Permission updated successfully');
-            },
-            onError: (errors) => {
-                console.log('Validation errors:', errors);
-            }
-        });
+        put(route('admin.permissions.update', permission.id));
     }
 
     return (

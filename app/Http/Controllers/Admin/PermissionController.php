@@ -54,9 +54,10 @@ class PermissionController extends Controller
     {
         $validated = $request->validated();
         
-        $this->permissionService->createPermission($validated);
+        $permission = $this->permissionService->createPermission($validated);
 
-        return redirect()->route('admin.permissions.index');
+        return redirect()->route('admin.permissions.index')
+            ->with('successMessage', "Permission '{$permission->name}' has been created successfully.");
     }
 
     /**
@@ -100,9 +101,11 @@ class PermissionController extends Controller
     {
         $validated = $request->validated();
         
+        $permission = $this->permissionService->findPermissionById((int) $id);
         $this->permissionService->updatePermission((int) $id, $validated);
 
-        return redirect()->route('admin.permissions.index');
+        return redirect()->route('admin.permissions.index')
+            ->with('successMessage', "Permission '{$permission->name}' has been updated successfully.");
     }
 
     /**
@@ -110,7 +113,12 @@ class PermissionController extends Controller
      */
     public function destroy(string $id)
     {
+        $permission = $this->permissionService->findPermissionById((int) $id);
+        $permissionName = $permission ? $permission->name : 'Permission';
+        
         $this->permissionService->deletePermission((int) $id);
-        return redirect()->route('admin.permissions.index');
+        
+        return redirect()->route('admin.permissions.index')
+            ->with('successMessage', "Permission '{$permissionName}' has been deleted successfully.");
     }
 }

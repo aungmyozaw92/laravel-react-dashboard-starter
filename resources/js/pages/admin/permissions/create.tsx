@@ -25,14 +25,7 @@ export default function Create() {
     function submit(e: React.FormEvent) {
         e.preventDefault();
         
-        post(route('admin.permissions.store'), {
-            onSuccess: () => {
-                console.log('Permission created successfully');
-            },
-            onError: (errors) => {
-                console.log('Validation errors:', errors);
-            }
-        });
+        post(route('admin.permissions.store'));
     }
 
     return (

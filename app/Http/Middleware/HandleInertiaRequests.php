@@ -47,6 +47,17 @@ class HandleInertiaRequests extends Middleware
                 'user' => $request->user(),
                 'permissions' => fn () => $request->user() ? $request->user()->getAllPermissions()->pluck('name') : [],
             ],
+            'flash' => [
+                'successMessage' => fn () => $request->session()->pull('successMessage'),
+                'errorMessage' => fn () => $request->session()->pull('errorMessage'),
+                'warningMessage' => fn () => $request->session()->pull('warningMessage'),
+                'infoMessage' => fn () => $request->session()->pull('infoMessage'),
+                // Legacy support
+                'success' => fn () => $request->session()->pull('success'),
+                'error' => fn () => $request->session()->pull('error'),
+                'warning' => fn () => $request->session()->pull('warning'),
+                'info' => fn () => $request->session()->pull('info'),
+            ],
             'ziggy' => function () use ($request) {
                 return array_merge((new Ziggy)->toArray(), [
                     'location' => $request->url(),
