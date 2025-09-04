@@ -61,6 +61,15 @@ class EloquentPermissionRepository implements PermissionRepositoryInterface
 
     public function getGroups(): SupportCollection
     {
+        // Use SQLite-compatible query instead of MySQL's SUBSTRING_INDEX
+        if (config('database.default') === 'sqlite') {
+            return Permission::selectRaw("SUBSTR(name, 1, INSTR(name || '-', '-') - 1) as group_name")
+                ->distinct()
+                ->orderBy('group_name')
+                ->get()
+                ->pluck('group_name');
+        }
+        
         return Permission::selectRaw('SUBSTRING_INDEX(name, "-", 1) as group_name')
             ->distinct()
             ->orderBy('group_name')
