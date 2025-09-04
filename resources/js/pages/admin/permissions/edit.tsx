@@ -1,0 +1,146 @@
+import AppLayout from '@/layouts/app-layout';
+import { type BreadcrumbItem } from '@/types';
+import { Head, Link, useForm } from '@inertiajs/react';
+import { ArrowLeft, Save, Shield, Edit3 } from 'lucide-react';
+import { route } from 'ziggy-js';
+
+interface Permission {
+    id: number;
+    name: string;
+    guard_name: string;
+    created_at: string;
+    updated_at: string;
+}
+
+interface Props {
+    permission: Permission;
+}
+
+const breadcrumbs: BreadcrumbItem[] = [
+    {
+        title: 'Permissions',
+        href: '/admin/permissions',
+    },
+    {
+        title: 'Edit Permission',
+        href: '#',
+    },
+];
+
+export default function Edit({ permission }: Props) {
+    const { data, setData, errors, put } = useForm<{
+        name: string;
+    }>({
+        name: permission.name,
+    });
+
+    function submit(e: React.FormEvent) {
+        e.preventDefault();
+        
+        put(route('admin.permissions.update', permission.id), {
+            onSuccess: () => {
+                console.log('Permission updated successfully');
+            },
+            onError: (errors) => {
+                console.log('Validation errors:', errors);
+            }
+        });
+    }
+
+    return (
+        <AppLayout breadcrumbs={breadcrumbs}>
+            <Head title={`Edit Permission: ${permission.name}`} />
+            
+            {/* Header Section */}
+            <div className="bg-white border-b border-gray-200">
+                <div className="p-6">
+                    <div className="flex items-center justify-between">
+                        <div className="flex items-center space-x-4">
+                            <Link 
+                                href={route('admin.permissions.show', permission.id)}
+                                className="inline-flex items-center gap-2 px-3 py-2 text-sm font-medium text-gray-600 hover:text-gray-900 transition-colors">
+                                <ArrowLeft className="w-4 h-4" />
+                                Back to Permission
+                            </Link>
+                            <div className="h-6 w-px bg-gray-300"></div>
+                            <div className="flex items-center space-x-3">
+                                <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full flex items-center justify-center">
+                                    <Edit3 className="w-6 h-6 text-white" />
+                                </div>
+                                <div>
+                                    <h1 className="text-2xl font-bold text-gray-900">Edit Permission</h1>
+                                    <p className="text-sm text-gray-600">Update permission details</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div className="p-6">
+                <div className="max-w-2xl mx-auto">
+                    <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+                        <div className="px-6 py-4 border-b border-gray-200 bg-gray-50">
+                            <h3 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
+                                <Shield className="w-5 h-5" />
+                                Permission Information
+                            </h3>
+                        </div>
+                        
+                        <form onSubmit={submit} className="p-6">
+                            <div className="space-y-6">
+                                {/* Name Field */}
+                                <div>
+                                    <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-2">
+                                        Permission Name <span className="text-red-500">*</span>
+                                    </label>
+                                    <div className="relative">
+                                        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                            <Shield className="h-4 w-4 text-gray-400" />
+                                        </div>
+                                        <input
+                                            id="name"
+                                            name="name"
+                                            type="text"
+                                            value={data.name}
+                                            onChange={(e) => setData('name', e.target.value)}
+                                            className="block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm placeholder-gray-400 transition-colors"
+                                            placeholder="e.g., user-create, post-edit, admin-delete"
+                                        />
+                                    </div>
+                                    {errors.name && (
+                                        <p className="mt-2 text-sm text-red-600 flex items-center gap-1">
+                                            <span className="w-4 h-4 rounded-full bg-red-100 flex items-center justify-center text-red-600 text-xs">!</span>
+                                            {errors.name}
+                                        </p>
+                                    )}
+                                    <p className="mt-1 text-sm text-gray-500">
+                                        Use kebab-case format (e.g., user-create, post-edit)
+                                    </p>
+                                </div>
+
+                            </div>
+
+                            {/* Form Actions */}
+                            <div className="mt-8 flex items-center justify-end space-x-4 pt-6 border-t border-gray-200">
+                                <Link 
+                                    href={route('admin.permissions.show', permission.id)}
+                                    className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 focus:ring-2 focus:ring-blue-500 focus:outline-none transition-colors"
+                                >
+                                    Cancel
+                                </Link>
+                                <button
+                                    type="submit"
+                                    className="inline-flex items-center gap-2 px-6 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 focus:ring-2 focus:ring-blue-500 focus:outline-none transition-colors shadow-sm"
+                                >
+                                    <Save className="w-4 h-4" />
+                                    Update Permission
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </AppLayout>
+    );
+}

@@ -1,6 +1,12 @@
 import { InertiaLinkProps } from '@inertiajs/react';
 import { LucideIcon } from 'lucide-react';
 
+declare global {
+    interface Window {
+        Ziggy: any;
+    }
+}
+
 export interface Auth {
     user: User;
 }

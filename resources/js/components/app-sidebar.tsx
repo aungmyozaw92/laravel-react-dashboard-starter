@@ -5,7 +5,7 @@ import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader, SidebarMenu, Sid
 import { dashboard } from '@/routes';
 import { type NavItem } from '@/types';
 import { Link } from '@inertiajs/react';
-import { LayoutGrid, ShieldX, Users } from 'lucide-react';
+import { FolderKey, LayoutGrid, ShieldX, Users } from 'lucide-react';
 import AppLogo from './app-logo';
 
 const mainNavItems: NavItem[] = [
@@ -15,15 +15,22 @@ const mainNavItems: NavItem[] = [
         icon: LayoutGrid,
     },
     {
-        title: 'Users',
-        href: '/admin/users',
-        icon: Users,
+        title: 'Permissions',
+        href: '/admin/permissions',
+        icon: FolderKey,
     },
     {
         title: 'Roles',
         href: '/admin/roles',
         icon: ShieldX,
     },
+    {
+        title: 'Users',
+        href: '/admin/users',
+        icon: Users,
+    },
+    
+   
 ];
 
 export function AppSidebar() {

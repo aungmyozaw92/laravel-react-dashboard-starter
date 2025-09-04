@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Admin\PermissionController;
 use App\Http\Controllers\Admin\RoleController;
 use App\Http\Controllers\Admin\UserController;
 use Illuminate\Support\Facades\Route;
@@ -36,6 +37,18 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::patch('/{role}', [RoleController::class, 'update'])->middleware('permission:role-edit')->name('update');
         Route::put('/{role}', [RoleController::class, 'update'])->middleware('permission:role-edit')->name('update');
         Route::delete('/{role}', [RoleController::class, 'destroy'])->middleware('permission:role-delete')->name('destroy');
+    });
+
+    // Admin permission management routes with specific permissions
+    Route::prefix('admin/permissions')->name('admin.permissions.')->group(function () {
+        Route::get('/', [PermissionController::class, 'index'])->middleware('permission:permission-list')->name('index');
+        Route::get('/create', [PermissionController::class, 'create'])->middleware('permission:permission-create')->name('create');
+        Route::post('/', [PermissionController::class, 'store'])->middleware('permission:permission-create')->name('store');
+        Route::get('/{permission}', [PermissionController::class, 'show'])->middleware('permission:permission-list')->name('show');
+        Route::get('/{permission}/edit', [PermissionController::class, 'edit'])->middleware('permission:permission-edit')->name('edit');
+        Route::patch('/{permission}', [PermissionController::class, 'update'])->middleware('permission:permission-edit')->name('update');
+        Route::put('/{permission}', [PermissionController::class, 'update'])->middleware('permission:permission-edit')->name('update');
+        Route::delete('/{permission}', [PermissionController::class, 'destroy'])->middleware('permission:permission-delete')->name('destroy');
     });
 });
 
