@@ -5,37 +5,33 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\User\StoreUserRequest;
 use App\Http\Requests\Admin\User\UpdateUserRequest;
-use App\Models\User;
+use App\Services\UserService;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Hash;
 use Inertia\Inertia;
 use Spatie\Permission\Models\Role;
 
 class UserController extends Controller
 {
+    public function __construct(
+        private UserService $userService
+    ) {}
     /**
      * Display a listing of the resource.
      */
     public function index(Request $request)
     {
-        $query = User::with('roles');
+        $search = $request->get('search');
+        $sortBy = $request->get('sort_by');
+        $sortDirection = $request->get('sort_direction', 'asc');
         
-        // Search functionality
-        if ($request->filled('search')) {
-            $search = $request->get('search');
-            $query->where(function ($q) use ($search) {
-                $q->where('name', 'like', "%{$search}%")
-                  ->orWhere('email', 'like', "%{$search}%");
-            });
-        }
-        
-        // Pagination with search preserved
-        $users = $query->paginate(10)->withQueryString();
+        $users = $this->userService->getPaginatedUsers(10, $search, $sortBy, $sortDirection);
         
         return Inertia::render('admin/users/index', [
             'users' => $users,
             'filters' => [
-                'search' => $request->get('search', ''),
+                'search' => $search ?? '',
+                'sort_by' => $sortBy ?? '',
+                'sort_direction' => $sortDirection,
             ]
         ]);
     }
@@ -57,17 +53,11 @@ class UserController extends Controller
     public function store(StoreUserRequest $request)
     {
         $validated = $request->validated();
-
-        $user = User::create([
-            'name' => $validated['name'],
-            'email' => $validated['email'],
-            'password' => Hash::make($validated['password']),
-        ]);
-
-        // Assign roles to the user
-        if (isset($validated['roles'])) {
-            $user->syncRoles($validated['roles']);
-        }
+        
+        $this->userService->createUser(
+            $validated,
+            $validated['roles'] ?? []
+        );
 
         return redirect()->route('admin.users.index');
     }
@@ -77,7 +67,12 @@ class UserController extends Controller
      */
     public function show(string $id)
     {
-        $user = User::with('roles')->findOrFail($id);
+        $user = $this->userService->findUserById((int) $id);
+        
+        if (!$user) {
+            abort(404);
+        }
+        
         return Inertia::render('admin/users/show', [
             'user' => $user
         ]);
@@ -88,7 +83,12 @@ class UserController extends Controller
      */
     public function edit(string $id)
     {
-        $user = User::with('roles')->findOrFail($id);
+        $user = $this->userService->findUserById((int) $id);
+        
+        if (!$user) {
+            abort(404);
+        }
+        
         $roles = Role::pluck('name');
         return Inertia::render('admin/users/edit', [
             'user' => $user,
@@ -103,19 +103,12 @@ class UserController extends Controller
     public function update(UpdateUserRequest $request, string $id)
     {
         $validated = $request->validated();
-        $user = User::findOrFail($id);      
-
-        $user->name = $validated['name'];
-        $user->email = $validated['email'];
-        if (!empty($validated['password'])) {
-            $user->password = Hash::make($validated['password']);
-        }
-        $user->save();
-
-        // Update user roles
-        if (isset($validated['roles'])) {
-            $user->syncRoles($validated['roles']);
-        }
+        
+        $this->userService->updateUser(
+            (int) $id,
+            $validated,
+            $validated['roles'] ?? []
+        );
 
         return redirect()->route('admin.users.index');
     }
@@ -125,7 +118,7 @@ class UserController extends Controller
      */
     public function destroy(string $id)
     {
-        User::destroy($id);
+        $this->userService->deleteUser((int) $id);
         return redirect()->route('admin.users.index')->with('success', 'User deleted successfully');
     }
 }

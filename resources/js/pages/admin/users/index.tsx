@@ -9,6 +9,7 @@ import { Plus, Users, Eye, Edit2, Trash2 } from 'lucide-react';
 import { can } from '@/lib/can';
 import { Pagination } from '@/components/ui/pagination';
 import { SearchInput } from '@/components/search-input';
+import { SortableHeader } from '@/components/sortable-header';
 
 interface User {
     id: number;
@@ -39,6 +40,8 @@ interface Props {
     users: PaginatedUsers;
     filters: {
         search: string;
+        sort_by: string;
+        sort_direction: string;
     };
 }
 
@@ -100,9 +103,30 @@ export default function Index({ users, filters }: Props) {
                             <table className="w-full text-sm text-left text-gray-700">
                                 <thead className="text-xs uppercase bg-gray-50 text-gray-700">
                                 <tr>
-                                    <th scope="col" className="px-6 py-3">ID</th>
-                                    <th scope="col" className="px-6 py-3">Name</th>
-                                    <th scope="col" className="px-6 py-3">Email</th>
+                                    <th scope="col" className="px-6 py-3">
+                                        <SortableHeader 
+                                            label="ID" 
+                                            sortKey="id" 
+                                            currentSort={filters.sort_by}
+                                            currentDirection={filters.sort_direction}
+                                        />
+                                    </th>
+                                    <th scope="col" className="px-6 py-3">
+                                        <SortableHeader 
+                                            label="Name" 
+                                            sortKey="name" 
+                                            currentSort={filters.sort_by}
+                                            currentDirection={filters.sort_direction}
+                                        />
+                                    </th>
+                                    <th scope="col" className="px-6 py-3">
+                                        <SortableHeader 
+                                            label="Email" 
+                                            sortKey="email" 
+                                            currentSort={filters.sort_by}
+                                            currentDirection={filters.sort_direction}
+                                        />
+                                    </th>
                                     <th scope="col" className="px-6 py-3">Roles</th>
                                     <th scope="col" className="px-6 py-3 w-70">Actions</th>
                                 </tr>

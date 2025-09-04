@@ -9,6 +9,7 @@ import { Plus, Eye, Edit2, Trash2, ShieldX } from 'lucide-react';
 import { can } from '@/lib/can';
 import { Pagination } from '@/components/ui/pagination';
 import { SearchInput } from '@/components/search-input';
+import { SortableHeader } from '@/components/sortable-header';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -17,7 +18,40 @@ const breadcrumbs: BreadcrumbItem[] = [
     },
 ];
 
-export default function Index({roles, filters}) {
+interface Role {
+    id: number;
+    name: string;
+    permissions: Array<{
+        id: number;
+        name: string;
+    }>;
+}
+
+interface PaginatedRoles {
+    data: Role[];
+    current_page: number;
+    last_page: number;
+    per_page: number;
+    total: number;
+    from: number;
+    to: number;
+    links: Array<{
+        url: string | null;
+        label: string;
+        active: boolean;
+    }>;
+}
+
+interface Props {
+    roles: PaginatedRoles;
+    filters: {
+        search: string;
+        sort_by: string;
+        sort_direction: string;
+    };
+}
+
+export default function Index({ roles, filters }: Props) {
     const {
         isModalOpen,
         itemToDelete,
@@ -68,8 +102,22 @@ export default function Index({roles, filters}) {
                             <table className="w-full text-sm text-left text-gray-700">
                                 <thead className="text-xs uppercase bg-gray-50 text-gray-700">
                                 <tr>
-                                    <th scope="col" className="px-6 py-3">ID</th>
-                                    <th scope="col" className="px-6 py-3">Name</th>
+                                    <th scope="col" className="px-6 py-3">
+                                        <SortableHeader 
+                                            label="ID" 
+                                            sortKey="id" 
+                                            currentSort={filters.sort_by}
+                                            currentDirection={filters.sort_direction}
+                                        />
+                                    </th>
+                                    <th scope="col" className="px-6 py-3">
+                                        <SortableHeader 
+                                            label="Name" 
+                                            sortKey="name" 
+                                            currentSort={filters.sort_by}
+                                            currentDirection={filters.sort_direction}
+                                        />
+                                    </th>
                                     <th scope="col" className="px-6 py-3">Permissions</th>
                                     <th scope="col" className="px-6 py-3 w-70">Actions</th>
                                 </tr>

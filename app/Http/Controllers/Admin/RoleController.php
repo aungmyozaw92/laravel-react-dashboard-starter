@@ -5,36 +5,32 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\Role\StoreRoleRequest;
 use App\Http\Requests\Admin\Role\UpdateRoleRequest;
+use App\Services\RoleService;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
-use Spatie\Permission\Models\Permission;
-use Spatie\Permission\Models\Role;
 
 class RoleController extends Controller
 {
+    public function __construct(
+        private RoleService $roleService
+    ) {}
     /**
      * Display a listing of the resource.
      */
     public function index(Request $request)
     {
+        $search = $request->get('search');
+        $sortBy = $request->get('sort_by');
+        $sortDirection = $request->get('sort_direction', 'asc');
         
-        $query = Role::with('permissions');
-        
-        // Search functionality
-        if ($request->filled('search')) {
-            $search = $request->get('search');
-            $query->where(function ($q) use ($search) {
-                $q->where('name', 'like', "%{$search}%");
-            });
-        }
-        
-        // Pagination with search preserved
-        $roles = $query->paginate(10)->withQueryString();
+        $roles = $this->roleService->getPaginatedRoles(10, $search, $sortBy, $sortDirection);
         
         return Inertia::render('admin/roles/index', [
             'roles' => $roles,
             'filters' => [
-                'search' => $request->get('search', ''),
+                'search' => $search ?? '',
+                'sort_by' => $sortBy ?? '',
+                'sort_direction' => $sortDirection,
             ]
         ]);
     }
@@ -44,7 +40,7 @@ class RoleController extends Controller
      */
     public function create()
     {
-        $permissions = Permission::pluck('name');
+        $permissions = $this->roleService->getAllPermissions()->pluck('name');
         return Inertia::render('admin/roles/create', [
             'permissions' => $permissions
         ]);
@@ -56,12 +52,11 @@ class RoleController extends Controller
     public function store(StoreRoleRequest $request)
     {
         $validated = $request->validated();
-
-        $role = Role::create([
-            'name' => $validated['name'],
-        ]);
-
-        $role->syncPermissions($validated['permissions']);
+        
+        $this->roleService->createRole(
+            $validated,
+            $validated['permissions'] ?? []
+        );
 
         return redirect()->route('admin.roles.index');
     }
@@ -71,7 +66,12 @@ class RoleController extends Controller
      */
     public function show(string $id)
     {
-        $role = Role::with('permissions')->findOrFail($id);
+        $role = $this->roleService->findRoleById((int) $id);
+        
+        if (!$role) {
+            abort(404);
+        }
+        
         return Inertia::render('admin/roles/show', [
             'role' => $role,
             'rolePermissions' => $role->permissions->pluck('name'),
@@ -83,8 +83,13 @@ class RoleController extends Controller
      */
     public function edit(string $id)
     {
-        $role = Role::with('permissions')->findOrFail($id);
-        $permissions = Permission::pluck('name');
+        $role = $this->roleService->findRoleById((int) $id);
+        
+        if (!$role) {
+            abort(404);
+        }
+        
+        $permissions = $this->roleService->getAllPermissions()->pluck('name');
         return Inertia::render('admin/roles/edit', [
             'role' => $role,
             'rolePermissions' => $role->permissions->pluck('name'),
@@ -98,12 +103,12 @@ class RoleController extends Controller
     public function update(UpdateRoleRequest $request, string $id)
     {
         $validated = $request->validated();
-
-        $role = Role::findOrFail($id);
-        $role->name = $validated['name'];
-        $role->save();
-
-        $role->syncPermissions($validated['permissions']);
+        
+        $this->roleService->updateRole(
+            (int) $id,
+            $validated,
+            $validated['permissions'] ?? []
+        );
 
         return redirect()->route('admin.roles.index');
     }
@@ -113,8 +118,7 @@ class RoleController extends Controller
      */
     public function destroy(string $id)
     {
-        Role::destroy($id);
-
+        $this->roleService->deleteRole((int) $id);
         return redirect()->route('admin.roles.index');
     }
 }
